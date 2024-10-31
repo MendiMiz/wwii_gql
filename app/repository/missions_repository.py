@@ -39,5 +39,3 @@ def missions_by_target_type(target_type: str) -> Maybe[List[Missions]]:
                                    .join(TargetTypes)
                                    .filter(TargetTypes.target_type_name == target_type)
                                    .all())
-# print(missions_by_target_industry("AIR FIELDS AND AIRDROMES"))
-# print(missions_by_target_type("A C ASSEMBLY"))
