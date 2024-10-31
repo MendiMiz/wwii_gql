@@ -1,6 +1,5 @@
 from typing import List
 from returns.maybe import Maybe
-from sqlalchemy import and_
 
 from app.db.database import session_maker
 from app.db.models import Missions, Targets, Cities, Countries, TargetTypes
@@ -39,3 +38,15 @@ def missions_by_target_type(target_type: str) -> Maybe[List[Missions]]:
                                    .join(TargetTypes)
                                    .filter(TargetTypes.target_type_name == target_type)
                                    .all())
+
+def delete_mission(mission_id: int):
+    with session_maker() as session:
+        mission = session.query(Missions).filter(Missions.mission_id == mission_id).first()
+
+        if mission:
+            session.delete(mission)
+            session.commit()
+            return True
+        else:
+            return False
+

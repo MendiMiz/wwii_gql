@@ -1,9 +1,10 @@
-from graphene import InputObjectType, Mutation, Field, Date, Float, Int
+from graphene import InputObjectType, Mutation, Field, Date, Float, Int, Boolean
 from sqlalchemy import func
 
 from app.db.database import session_maker
 from app.db.models import Missions
 from app.gql.types.missions_type import MissionsType
+from app.repository.missions_repository import delete_mission
 
 
 class MissionMutationInput(InputObjectType):
@@ -66,4 +67,18 @@ class UpdateMission(Mutation):
             session.refresh(mission_to_update)
 
             return UpdateMission(mission=mission_to_update)
+
+class DeleteMission(Mutation):
+    class Arguments:
+        mission_id = Int(required=True)
+
+    result = Field(Boolean)
+
+    @staticmethod
+    def mutate(root, info, mission_id):
+        return DeleteMission(result= delete_mission(mission_id))
+
+
+
+
 

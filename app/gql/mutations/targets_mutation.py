@@ -35,3 +35,4 @@ class AddTarget(Mutation):
             session.commit()
             session.refresh(target_to_insert)
             return AddTarget(target=target_to_insert)
+
