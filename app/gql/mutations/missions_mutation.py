@@ -57,7 +57,7 @@ class UpdateMission(Mutation):
     @staticmethod
     def mutate(root, info, mission_id, mission_input=None):
         with session_maker() as session:
-            mission_to_update = session.query(Missions).filter_by(Missions.mission_id == mission_id).first()
+            mission_to_update = session.query(Missions).filter(Missions.mission_id == mission_id).first()
 
             for k, v in mission_input.items():
                 setattr(mission_to_update, k, v)
