@@ -1,4 +1,4 @@
-from graphene import InputObjectType, Mutation, Field, Date, Float
+from graphene import InputObjectType, Mutation, Field, Date, Float, Int
 from sqlalchemy import func
 
 from app.db.database import session_maker
@@ -44,3 +44,26 @@ class AddMission(Mutation):
             session.commit()
             session.refresh(mission_to_insert)
             return AddMission(mission=mission_to_insert)
+
+
+
+class UpdateMission(Mutation):
+    class Arguments:
+        mission_id = Int(required=True)
+        mission_input = MissionMutationInput(required=True)
+
+    mission = Field(MissionsType)
+
+    @staticmethod
+    def mutate(root, info, mission_id, mission_input=None):
+        with session_maker() as session:
+            mission_to_update = session.query(Missions).filter_by(Missions.mission_id == mission_id).first()
+
+            for k, v in mission_input.items():
+                setattr(mission_to_update, k, v)
+
+            session.commit()
+            session.refresh(mission_to_update)
+
+            return UpdateMission(mission=mission_to_update)
+
