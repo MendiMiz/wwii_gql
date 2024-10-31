@@ -4,7 +4,7 @@ from sqlalchemy import func
 from app.db.database import session_maker
 from app.db.models import Missions
 from app.gql.types.missions_type import MissionsType
-from app.repository.missions_repository import delete_mission
+from app.repository.missions_repository import delete_mission, update_mission, create_mission
 
 
 class MissionMutationInput(InputObjectType):
@@ -28,23 +28,7 @@ class AddMission(Mutation):
 
     @staticmethod
     def mutate(root, info, mission_input=None):
-        with session_maker() as session:
-            new_mission_id = session.query(func.max(Missions.mission_id)).scalar() + 1
-            mission_to_insert = Missions(
-                mission_id= new_mission_id,
-                mission_date=mission_input.mission_date,
-                airborne_aircraft =mission_input.airborne_aircraft,
-                attacking_aircraft =mission_input.attacking_aircraft,
-                bombing_aircraft =mission_input.bombing_aircraft,
-                aircraft_returned = mission_input.aircraft_returned,
-                aircraft_failed =mission_input.aircraft_failed,
-                aircraft_damaged = mission_input.aircraft_damaged,
-                aircraft_lost = mission_input.aircraft_lost
-            )
-            session.add(mission_to_insert)
-            session.commit()
-            session.refresh(mission_to_insert)
-            return AddMission(mission=mission_to_insert)
+        return AddMission(mission=create_mission(mission_input))
 
 
 
@@ -57,16 +41,9 @@ class UpdateMission(Mutation):
 
     @staticmethod
     def mutate(root, info, mission_id, mission_input=None):
-        with session_maker() as session:
-            mission_to_update = session.query(Missions).filter(Missions.mission_id == mission_id).first()
+        return UpdateMission(mission=update_mission(mission_id, mission_input))
 
-            for k, v in mission_input.items():
-                setattr(mission_to_update, k, v)
 
-            session.commit()
-            session.refresh(mission_to_update)
-
-            return UpdateMission(mission=mission_to_update)
 
 class DeleteMission(Mutation):
     class Arguments:

@@ -1,5 +1,6 @@
 from typing import List
 from returns.maybe import Maybe
+from sqlalchemy import func
 
 from app.db.database import session_maker
 from app.db.models import Missions, Targets, Cities, Countries, TargetTypes
@@ -50,3 +51,32 @@ def delete_mission(mission_id: int):
         else:
             return False
 
+def update_mission(mission_id, mission_input):
+    with session_maker() as session:
+        mission_to_update = session.query(Missions).filter(Missions.mission_id == mission_id).first()
+
+        for k, v in mission_input.items():
+            setattr(mission_to_update, k, v)
+
+        session.commit()
+        session.refresh(mission_to_update)
+        return mission_to_update
+
+def create_mission(mission_input):
+    with session_maker() as session:
+        new_mission_id = session.query(func.max(Missions.mission_id)).scalar() + 1
+        mission_to_insert = Missions(
+            mission_id=new_mission_id,
+            mission_date=mission_input.mission_date,
+            airborne_aircraft=mission_input.airborne_aircraft,
+            attacking_aircraft=mission_input.attacking_aircraft,
+            bombing_aircraft=mission_input.bombing_aircraft,
+            aircraft_returned=mission_input.aircraft_returned,
+            aircraft_failed=mission_input.aircraft_failed,
+            aircraft_damaged=mission_input.aircraft_damaged,
+            aircraft_lost=mission_input.aircraft_lost
+        )
+        session.add(mission_to_insert)
+        session.commit()
+        session.refresh(mission_to_insert)
+        return mission_to_insert
